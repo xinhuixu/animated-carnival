@@ -3,6 +3,9 @@ from display import *
 from matrix import *
 from draw import *
 
+num_frames = 0
+basename = ''
+
 """======== first_pass( commands, symbols ) ==========
 
   Checks the commands array for any animation commands
@@ -21,9 +24,18 @@ from draw import *
   jdyrlandweaver
   ==================== """
 def first_pass( commands ):
-    pass
+    print "COMMANDS", commands
+    for cmd in commands:
+        if cmd[0] == 'frames':
+            num_frames = cmd[1]
+        elif cmd[0] == 'basename':
+            basename = cmd[1]
+        elif cmd       
 
-
+    if len(basename)==0:
+        print 'BASENAME UNSPECIFIED. DEFAULT SET'
+        basename = 'def'
+    
 """======== second_pass( commands ) ==========
 
   In order to set the knobs for animation, we need to keep
@@ -61,13 +73,14 @@ def run(filename):
         print "Parsing failed."
         return
 
+    first_pass(commands)
     ident(tmp)
     stack = [ [x[:] for x in tmp] ]
     screen = new_screen()
     tmp = []
     step = 0.1
     for command in commands:
-        print command
+
         c = command[0]
         args = command[1:]
 
