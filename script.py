@@ -5,6 +5,7 @@ from draw import *
 
 num_frames = 0
 basename = ''
+frames_set = False
 
 """======== first_pass( commands, symbols ) ==========
 
@@ -30,7 +31,15 @@ def first_pass( commands ):
             num_frames = cmd[1]
         elif cmd[0] == 'basename':
             basename = cmd[1]
-        elif cmd       
+        elif cmd[0] == 'vary':
+            if not frames_set:
+                print 'INVALID "VARY" COMMAND. EXIT'
+                return
+    if num_frames > 0:
+        if basename == '':
+            basename = 'def'
+            print 'BASENAME UNSPECIFIED, SET TO def'
+
 
     if len(basename)==0:
         print 'BASENAME UNSPECIFIED. DEFAULT SET'
