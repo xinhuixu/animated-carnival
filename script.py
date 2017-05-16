@@ -3,9 +3,8 @@ from display import *
 from matrix import *
 from draw import *
 
-num_frames = 0
+frames = 0
 basename = ''
-frames_set = False
 
 """======== first_pass( commands, symbols ) ==========
 
@@ -28,22 +27,17 @@ def first_pass( commands ):
     print "COMMANDS", commands
     for cmd in commands:
         if cmd[0] == 'frames':
-            num_frames = cmd[1]
+            frames = cmd[1]
         elif cmd[0] == 'basename':
             basename = cmd[1]
         elif cmd[0] == 'vary':
-            if not frames_set:
+            if frames == 0:
                 print 'INVALID "VARY" COMMAND. EXIT'
                 return
-    if num_frames > 0:
+    if frames > 0:
         if basename == '':
             basename = 'def'
             print 'BASENAME UNSPECIFIED, SET TO def'
-
-
-    if len(basename)==0:
-        print 'BASENAME UNSPECIFIED. DEFAULT SET'
-        basename = 'def'
     
 """======== second_pass( commands ) ==========
 
