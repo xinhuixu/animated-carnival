@@ -3,8 +3,9 @@ from display import *
 from matrix import *
 from draw import *
 
-frames = 0
+frames = 1
 basename = ''
+knobs = []
 
 """======== first_pass( commands, symbols ) ==========
 
@@ -34,7 +35,7 @@ def first_pass( commands ):
             if frames == 0:
                 print 'INVALID "VARY" COMMAND. EXIT'
                 return
-    if frames > 0:
+    if frames > 1:
         if basename == '':
             basename = 'def'
             print 'BASENAME UNSPECIFIED, SET TO def'
@@ -57,7 +58,20 @@ def first_pass( commands ):
   appropirate value. 
   ===================="""
 def second_pass( commands, num_frames ):
-    pass
+    if frames = 1:
+        return
+    knobs = [{} for f in range(frames)]
+    for command in commands:        
+        cmd = command[0]
+        args = command[1:]
+        if cmd =='vary':
+            knob_name = args[0]
+            frame_f = int(args[2])
+            value_i = float(args[3])
+            value_f = float(args[4])
+            df = frame_f - frame_i
+
+                
 
 
 def run(filename):
@@ -77,6 +91,8 @@ def run(filename):
         return
 
     first_pass(commands)
+    second_pass(commands, frames)
+
     ident(tmp)
     stack = [ [x[:] for x in tmp] ]
     screen = new_screen()
