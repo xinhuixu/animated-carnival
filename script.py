@@ -58,19 +58,31 @@ def first_pass( commands ):
   appropirate value. 
   ===================="""
 def second_pass( commands, num_frames ):
-    if frames = 1:
+    if frames == 1:
+        print 'STATIC IMAGE'
         return
     knobs = [{} for f in range(frames)]
     for command in commands:        
         cmd = command[0]
         args = command[1:]
         if cmd =='vary':
+            #vary [bigenator 0 24 0 1]
+            
             knob_name = args[0]
+            frame_i = int(args[1])
             frame_f = int(args[2])
             value_i = float(args[3])
             value_f = float(args[4])
             df = frame_f - frame_i
+            if df < 0:
+                print 'NEGATIVE FRAME RANGE. EXIT'
+                return
+            #dv = value_f - value_i
+            #SOMETHING WRONG
+            for f in range(frame_i, frame_f):
+                knobs[f][knob-name] = f / df
 
+     return knobs
                 
 
 
