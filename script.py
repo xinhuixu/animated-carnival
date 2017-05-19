@@ -6,6 +6,7 @@ from draw import *
 frames = 1
 basename = ''
 knobs = []
+gif = False
 
 """======== first_pass( commands, symbols ) ==========
 
@@ -25,10 +26,12 @@ knobs = []
   jdyrlandweaver
   ==================== """
 def first_pass( commands ):
+    global frames
     print "COMMANDS", commands
     for cmd in commands:
-        if cmd[0] == 'frames':
+        if cmdo[0] == 'frames':
             frames = cmd[1]
+            print "FRAMES SET"
         elif cmd[0] == 'basename':
             basename = cmd[1]
         elif cmd[0] == 'vary':
@@ -79,10 +82,9 @@ def second_pass( commands, num_frames ):
                 return
             #dv = value_f - value_i
             #SOMETHING WRONG
-            for f in range(frame_i, frame_f):
-                knobs[f][knob-name] = f / df
-
-     return knobs
+            for f in range(0, df):
+                knobs[frame_i + f][knob-name] = f / df
+    return knobs
                 
 
 
@@ -105,61 +107,72 @@ def run(filename):
     first_pass(commands)
     second_pass(commands, frames)
 
-    ident(tmp)
-    stack = [ [x[:] for x in tmp] ]
-    screen = new_screen()
-    tmp = []
-    step = 0.1
-    for command in commands:
+    if frames > 1:
+        gif = True
 
-        c = command[0]
-        args = command[1:]
+    for f in range(0, frames):
+        
+        ident(tmp)
+        stack = [ [x[:] for x in tmp] ]
+        screen = new_screen()
+        tmp = []
+        step = 0.1
+        for command in commands:
 
-        if c == 'box':
-            add_box(tmp,
-                    args[0], args[1], args[2],
-                    args[3], args[4], args[5])
-            matrix_mult( stack[-1], tmp )
-            draw_polygons(tmp, screen, color)
-            tmp = []
-        elif c == 'sphere':
-            add_sphere(tmp,
-                       args[0], args[1], args[2], args[3], step)
-            matrix_mult( stack[-1], tmp )
-            draw_polygons(tmp, screen, color)
-            tmp = []
-        elif c == 'torus':
-            add_torus(tmp,
-                      args[0], args[1], args[2], args[3], args[4], step)
-            matrix_mult( stack[-1], tmp )
-            draw_polygons(tmp, screen, color)
-            tmp = []
-        elif c == 'move':
-            tmp = make_translate(args[0], args[1], args[2])
-            matrix_mult(stack[-1], tmp)
-            stack[-1] = [x[:] for x in tmp]
-            tmp = []
-        elif c == 'scale':
-            tmp = make_scale(args[0], args[1], args[2])
-            matrix_mult(stack[-1], tmp)
-            stack[-1] = [x[:] for x in tmp]
-            tmp = []
-        elif c == 'rotate':
-            theta = args[1] * (math.pi/180)
-            if args[0] == 'x':
-                tmp = make_rotX(theta)
-            elif args[0] == 'y':
-                tmp = make_rotY(theta)
-            else:
-                tmp = make_rotZ(theta)
-            matrix_mult( stack[-1], tmp )
-            stack[-1] = [ x[:] for x in tmp]
-            tmp = []
-        elif c == 'push':
-            stack.append([x[:] for x in stack[-1]] )
-        elif c == 'pop':
-            stack.pop()
-        elif c == 'display':
-            display(screen)
-        elif c == 'save':
-            save_extension(screen, args[0])
+            c = command[0]
+            args = command[1:]
+
+            if c == 'box':
+                add_box(tmp,
+                        args[0], args[1], args[2],
+                        args[3], args[4], args[5])
+                matrix_mult( stack[-1], tmp )
+                draw_polygons(tmp, screen, color)
+                tmp = []
+            elif c == 'sphere':
+                add_sphere(tmp,
+                        args[0], args[1], args[2], args[3], step)
+                matrix_mult( stack[-1], tmp )
+                draw_polygons(tmp, screen, color)
+                tmp = []
+            elif c == 'torus':
+                add_torus(tmp,
+                        args[0], args[1], args[2], args[3], args[4], step)
+                matrix_mult( stack[-1], tmp )
+                draw_polygons(tmp, screen, color)
+                tmp = []
+            elif c == 'move':
+                tmp = make_translate(args[0], args[1], args[2])
+                matrix_mult(stack[-1], tmp)
+                stack[-1] = [x[:] for x in tmp]
+                tmp = []
+            elif c == 'scale':
+                tmp = make_scale(args[0], args[1], args[2])
+                matrix_mult(stack[-1], tmp)
+                stack[-1] = [x[:] for x in tmp]
+                tmp = []
+            elif c == 'rotate':
+                theta = args[1] * (math.pi/180)
+                if args[0] == 'x':
+                    tmp = make_rotX(theta)
+                elif args[0] == 'y':
+                    tmp = make_rotY(theta)
+                else:
+                    tmp = make_rotZ(theta)
+                matrix_mult( stack[-1], tmp )
+                stack[-1] = [ x[:] for x in tmp]
+                tmp = []
+            elif c == 'push':
+                stack.append([x[:] for x in stack[-1]] )
+            elif c == 'pop':
+                stack.pop()
+            elif c == 'display':
+                display(screen)
+            elif c == 'save':
+                save_extension(screen, args[0])
+
+            if gif:
+                save_extension(screen, basename + '"03d"%' + f)
+                screen[:] = []
+                stack[:] = []
+                #any other pieces of data specific to given frame
