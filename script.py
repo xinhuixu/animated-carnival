@@ -83,19 +83,18 @@ def second_pass( commands, num_frames ):
             vi = float(args[3])
             vf = float(args[4])
 
-            dvdf = (vf - vi)/(ff - fi)
-
-            v_current = float(args[4])
             if ff < fi:
                 print 'NEGATIVE FRAME RANGE. EXIT'
                 return
-
-            for f in range(fi, ff):
+            
+            dvdf = (vf - vi) / (ff - fi)
+            v_current = vi
+            
+            for f in range(fi, ff + 1):
                 knobs[f][knob_name] = v_current
                 v_current += dvdf
-                print v_current
                 
-    return knobs
+    print knobs            
                 
 
 
@@ -131,21 +130,20 @@ def run(filename):
         ident(tmp)
         stack = [ [x[:] for x in tmp] ]
         tmp = []
-        step = 0.1
-        k = 1 #knob coefficient
-        
+        step = 0.1        
+        k = 1 #knob coefficient #UNNECESSARY
+            
         for command in commands:
-            print command
             c = command[0]
             args = command[1:]
 
 
             if c == 'set_knobs':
                 for sym in symbols:
-                    if symbols[sym][0] == 'knob':
-                        symbols[sym][1] == args[0]                        
+                    if symbols[sym][0] == 'knob':                        
+                        symbols[sym][1] == float(args[1]) 
             elif c == 'set':
-                symbols[args[0]][1] = float(args[1])
+                symbols[args[0]][0] = float(args[1])
             elif c == 'box':
                 add_box(tmp,
                         args[0], args[1], args[2],
@@ -167,8 +165,10 @@ def run(filename):
                 tmp = []
             elif c == 'move':
                 if args[3] != None: #move 0 150 0 movenator
-                    k = symbols[args[3]][1]
-                    
+                    a0 = args[0] * knobs[f][args[3]]
+                    a1 = args[1] * knobs[f][args[3]]
+                    a2 = args[2] * knobs[f][args[3]]
+                    args = [a0,a1,a2,args[3]]                    
                 tmp = make_translate(args[0]*k, args[1]*k, args[2]*k)
                 matrix_mult(stack[-1], tmp)
                 stack[-1] = [x[:] for x in tmp]
@@ -176,16 +176,20 @@ def run(filename):
             elif c == 'scale':
 
                 if args[3] != None:
-                    k = symbols[args[3]][1]
-                tmp = make_scale(args[0]*k, args[1]*k, args[2]*k)
+                    a0 = args[0] * knobs[f][args[3]]
+                    a1 = args[1] * knobs[f][args[3]]
+                    a2 = args[2] * knobs[f][args[3]]
+                    args = [a0,a1,a2,args[3]]        
+                tmp = make_scale(args[0], args[1], args[2])
                 matrix_mult(stack[-1], tmp)
                 stack[-1] = [x[:] for x in tmp]
                 tmp = []
+                
             elif c == 'rotate':
                 theta = args[1] * (math.pi/180)
                 if args[2] != None:
-                    k = symbols[args[2]][1]
-                
+                    a1 = args[1] * knobs[f][args[2]]
+                    args = [args[0],a1,args[2]]
                 if args[0] == 'x':
                     tmp = make_rotX(theta * k)
                 elif args[0] == 'y':
@@ -205,10 +209,15 @@ def run(filename):
                 save_extension(screen, args[0])
 
         if gif:
-            frame_name =  'anime/%s%03d.png' % (basename, f)
+            frame_name =  'anime/%s%03d' % (basename, f)
+            save_ppm(screen, frame_name)
             print "SAVED FRAME %d AS [%s]" % (f, frame_name)
+
             for sym in symbols:
-                print "KNOB: %s\tVALUE: %f" % (sym, symbols[sym][1])
-            save_extension(screen, frame_name)
+               print "KNOB: %s\tVALUE: %f" % (sym, knobs[f][sym])
+
+            
             clear_screen(screen)
             
+    make_animation(basename)
+

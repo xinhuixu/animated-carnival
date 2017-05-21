@@ -59,7 +59,7 @@ def display( screen ):
     remove(ppm_name)
 
 def make_animation( name ):
-    name_arg = 'anim/' + name + '*'
+    name_arg = 'anime/' + name + '*'
     name = name + '.gif'
     print 'Saving animation as ' + name
     f = fork()
