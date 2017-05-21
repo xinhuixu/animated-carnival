@@ -83,7 +83,7 @@ def second_pass( commands, num_frames ):
             vi = float(args[3])
             vf = float(args[4])
 
-            if ff < fi:
+            if ff < fi or ff > frames or fi > frames:
                 print 'NEGATIVE FRAME RANGE. EXIT'
                 return
             
