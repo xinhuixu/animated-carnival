@@ -94,7 +94,7 @@ def second_pass( commands, num_frames ):
                 knobs[f][knob_name] = v_current
                 v_current += dvdf
                 
-    print knobs            
+#    print knobs            
                 
 
 
@@ -186,10 +186,13 @@ def run(filename):
                 tmp = []
                 
             elif c == 'rotate':
-                theta = args[1] * (math.pi/180)
+
                 if args[2] != None:
                     a1 = args[1] * knobs[f][args[2]]
                     args = [args[0],a1,args[2]]
+
+                theta = args[1] * (math.pi/180)
+                
                 if args[0] == 'x':
                     tmp = make_rotX(theta * k)
                 elif args[0] == 'y':
