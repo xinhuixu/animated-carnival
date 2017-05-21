@@ -27,13 +27,15 @@ gif = False
   ==================== """
 def first_pass( commands ):
     global frames
-    print "COMMANDS", commands
+    global basename
+
     for cmd in commands:
-        if cmdo[0] == 'frames':
+        if cmd[0] == 'frames':
             frames = cmd[1]
-            print "FRAMES SET"
+            print "FRAMES SET TO [%s]" % frames
         elif cmd[0] == 'basename':
             basename = cmd[1]
+            print "BASENAME SET TO [%s]" % basename
         elif cmd[0] == 'vary':
             if frames == 0:
                 print 'INVALID "VARY" COMMAND. EXIT'
@@ -61,10 +63,14 @@ def first_pass( commands ):
   appropirate value. 
   ===================="""
 def second_pass( commands, num_frames ):
+    global knobs
+    
     if frames == 1:
         print 'STATIC IMAGE'
         return
+    
     knobs = [{} for f in range(frames)]
+
     for command in commands:        
         cmd = command[0]
         args = command[1:]
@@ -72,18 +78,23 @@ def second_pass( commands, num_frames ):
             #vary [bigenator 0 24 0 1]
             
             knob_name = args[0]
-            frame_i = int(args[1])
-            frame_f = int(args[2])
-            value_i = float(args[3])
-            value_f = float(args[4])
-            df = frame_f - frame_i
-            if df < 0:
+            fi = int(args[1])
+            ff = int(args[2])
+            vi = float(args[3])
+            vf = float(args[4])
+
+            dvdf = (vf - vi)/(ff - fi)
+
+            v_current = float(args[4])
+            if ff < fi:
                 print 'NEGATIVE FRAME RANGE. EXIT'
                 return
-            #dv = value_f - value_i
-            #SOMETHING WRONG
-            for f in range(0, df):
-                knobs[frame_i + f][knob-name] = f / df
+
+            for f in range(fi, ff):
+                knobs[f][knob_name] = v_current
+                v_current += dvdf
+                print v_current
+                
     return knobs
                 
 
@@ -92,9 +103,14 @@ def run(filename):
     """
     This function runs an mdl script
     """
+    global frames
+    global basename
+    global knobs
+
     color = [255, 255, 255]
     tmp = new_matrix()
     ident( tmp )
+    screen = new_screen()
 
     p = mdl.parseFile(filename)
 
@@ -111,18 +127,26 @@ def run(filename):
         gif = True
 
     for f in range(0, frames):
-        
+        tmp = new_matrix()
         ident(tmp)
         stack = [ [x[:] for x in tmp] ]
-        screen = new_screen()
         tmp = []
         step = 0.1
+        k = 1 #knob coefficient
+        
         for command in commands:
-
+            print command
             c = command[0]
             args = command[1:]
 
-            if c == 'box':
+
+            if c == 'set_knobs':
+                for sym in symbols:
+                    if symbols[sym][0] == 'knob':
+                        symbols[sym][1] == args[0]                        
+            elif c == 'set':
+                symbols[args[0]][1] = float(args[1])
+            elif c == 'box':
                 add_box(tmp,
                         args[0], args[1], args[2],
                         args[3], args[4], args[5])
@@ -142,23 +166,32 @@ def run(filename):
                 draw_polygons(tmp, screen, color)
                 tmp = []
             elif c == 'move':
-                tmp = make_translate(args[0], args[1], args[2])
+                if args[3] != None: #move 0 150 0 movenator
+                    k = symbols[args[3]][1]
+                    
+                tmp = make_translate(args[0]*k, args[1]*k, args[2]*k)
                 matrix_mult(stack[-1], tmp)
                 stack[-1] = [x[:] for x in tmp]
                 tmp = []
             elif c == 'scale':
-                tmp = make_scale(args[0], args[1], args[2])
+
+                if args[3] != None:
+                    k = symbols[args[3]][1]
+                tmp = make_scale(args[0]*k, args[1]*k, args[2]*k)
                 matrix_mult(stack[-1], tmp)
                 stack[-1] = [x[:] for x in tmp]
                 tmp = []
             elif c == 'rotate':
                 theta = args[1] * (math.pi/180)
+                if args[2] != None:
+                    k = symbols[args[2]][1]
+                
                 if args[0] == 'x':
-                    tmp = make_rotX(theta)
+                    tmp = make_rotX(theta * k)
                 elif args[0] == 'y':
-                    tmp = make_rotY(theta)
+                    tmp = make_rotY(theta * k)
                 else:
-                    tmp = make_rotZ(theta)
+                    tmp = make_rotZ(theta * k)
                 matrix_mult( stack[-1], tmp )
                 stack[-1] = [ x[:] for x in tmp]
                 tmp = []
@@ -166,13 +199,16 @@ def run(filename):
                 stack.append([x[:] for x in stack[-1]] )
             elif c == 'pop':
                 stack.pop()
-            elif c == 'display':
+            elif c == 'display' and not gif:                
                 display(screen)
-            elif c == 'save':
+            elif c == 'save' and not gif:
                 save_extension(screen, args[0])
 
-            if gif:
-                save_extension(screen, basename + '"03d"%' + f)
-                screen[:] = []
-                stack[:] = []
-                #any other pieces of data specific to given frame
+        if gif:
+            frame_name =  'anime/%s%03d.png' % (basename, f)
+            print "SAVED FRAME %d AS [%s]" % (f, frame_name)
+            for sym in symbols:
+                print "KNOB: %s\tVALUE: %f" % (sym, symbols[sym][1])
+            save_extension(screen, frame_name)
+            clear_screen(screen)
+            
