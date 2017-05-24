@@ -18,9 +18,24 @@ def scanlines(p0, p1, p2):
     yi = top[1]
     x0 = top[0]
     x1 = top[0]
-    z0 = top[2]
-    z1 = top[2]
-    
+    #z0 = top[2]
+    #z1 = top[2]
+
+    if bot[1] == top[1]:
+        dx0 = 0
+    else:
+        dx0 = (bot[0]-top[0])/(bot[1]-top[1])
+
+    if bot[1] == mid[1]:
+        dx1b = 0
+    else:
+        dx1b = (bot[0]-mid[0])/(bot[1]-mid[1])
+        
+    if mid[1] == top[1]:
+        dx1m = 0
+    else:
+        dx1m = (mid[0]-top[0])/(mid[1]-top[1])
+        
 
     
 def draw_polygons( matrix, screen, color ):
