@@ -2,23 +2,38 @@ from display import *
 from matrix import *
 from math import *
 from gmath import *
+import random
 
 def add_polygon( polygons, x0, y0, z0, x1, y1, z1, x2, y2, z2 ):
     add_point(polygons, x0, y0, z0);
     add_point(polygons, x1, y1, z1);
     add_point(polygons, x2, y2, z2);
 
+def scanlines(p0, p1, p2):
+    color = random.sample(xrange(255), 3)
+    points = sorted((p0, p1, p2), key=lambda p: p[1]) #sort by y
+    top = points[0]
+    mid = points[1]
+    bot = points[2]
+    yi = top[1]
+    x0 = top[0]
+    x1 = top[0]
+    z0 = top[2]
+    z1 = top[2]
+    
+
+    
 def draw_polygons( matrix, screen, color ):
     if len(matrix) < 2:
         print 'Need at least 3 points to draw'
         return
 
-    point = 0    
+    point = 0
+        
     while point < len(matrix) - 2:
-
         normal = calculate_normal(matrix, point)[:]
-
         if normal[2] > 0:
+        '''        
             draw_line( int(matrix[point][0]),
                        int(matrix[point][1]),
                        int(matrix[point+1][0]),
@@ -33,7 +48,10 @@ def draw_polygons( matrix, screen, color ):
                        int(matrix[point][1]),
                        int(matrix[point+2][0]),
                        int(matrix[point+2][1]),
-                       screen, color)    
+                       screen, color)
+        '''
+            scanlines(matrix[point], matrix[point+1], matrix[point+2])
+
         point+= 3
 
 
