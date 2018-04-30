@@ -1,2 +1,2 @@
 # animated-carnival
-gfx knobs
+generated gif: my.gif
